@@ -1,0 +1,21 @@
+﻿<UserControl x:Class="LEAFLogger.UserControls.BackTileUserControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    FontFamily="{StaticResource PhoneFontFamilyNormal}"
+    FontSize="{StaticResource PhoneFontSizeNormal}"
+    Foreground="{StaticResource PhoneForegroundBrush}"
+    d:DesignHeight="336" d:DesignWidth="336">
+
+    <Canvas Height="336" Width="336">
+        <TextBlock Canvas.Left="10" Canvas.Top="10"  Text="{Binding SoC, StringFormat='{}State of Charge: {0:P2}'}" FontSize="{StaticResource PhoneFontSizeMedium}" FontFamily="{StaticResource PhoneFontFamilySemiBold}" />
+        <TextBlock Canvas.Left="10" Canvas.Top="40"  Text="{Binding AverageEnergyEconomy, StringFormat='{}Energy Economy: {0:N1} m/kWh'}" FontSize="{StaticResource PhoneFontSizeMedium}" FontFamily="{StaticResource PhoneFontFamilySemiBold}" />
+        <TextBlock Canvas.Left="10" Canvas.Top="70" Text="{Binding DisplayTemperature, StringFormat='{}Temps: {0}'}" FontSize="{StaticResource PhoneFontSizeMedium}" FontFamily="{StaticResource PhoneFontFamilySemiBold}" />
+        <TextBlock Canvas.Left="10" Canvas.Top="100" Text="{Binding Range, StringFormat='{}Range: {0:N0} miles'}" FontSize="{StaticResource PhoneFontSizeMedium}" FontFamily="{StaticResource PhoneFontFamilySemiBold}" />
+        <TextBlock Canvas.Left="10" Canvas.Top="130" Text="{Binding TotalDistance, StringFormat='{}Trip Distance: {0:N2} mi'}" FontSize="{StaticResource PhoneFontSizeMedium}" FontFamily="{StaticResource PhoneFontFamilySemiBold}" />
+        <TextBlock x:Name="duration" Canvas.Left="10" Canvas.Top="160" FontSize="{StaticResource PhoneFontSizeMedium}" FontFamily="{StaticResource PhoneFontFamilySemiBold}" />
+        <Image Source="/Assets/ApplicationIcon.png" Canvas.Left="163" Canvas.Top="163" Height="173" Width="173" />
+    </Canvas>
+</UserControl>

@@ -1,0 +1,201 @@
+﻿<phone:PhoneApplicationPage
+    x:Class="LEAFLogger.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:maps="clr-namespace:Microsoft.Phone.Maps.Controls;assembly=Microsoft.Phone.Maps"
+    xmlns:maptk="clr-namespace:Microsoft.Phone.Maps.Toolkit;assembly=Microsoft.Phone.Controls.Toolkit"
+    xmlns:user="clr-namespace:LEAFLogger.UserControls"
+    xmlns:chart="clr-namespace:Telerik.Windows.Controls;assembly=Telerik.Windows.Controls.Chart"
+    xmlns:chartEngine="clr-namespace:Telerik.Charting;assembly=Telerik.Windows.Controls.Chart"
+    xmlns:telerikInput="clr-namespace:Telerik.Windows.Controls;assembly=Telerik.Windows.Controls.Input" 
+    xmlns:telerikPrimitives="clr-namespace:Telerik.Windows.Controls;assembly=Telerik.Windows.Controls.Primitives"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    FontFamily="{StaticResource PhoneFontFamilyNormal}"
+    FontSize="{StaticResource PhoneFontSizeNormal}"
+    Foreground="{StaticResource PhoneForegroundBrush}"
+    SupportedOrientations="Portrait"  Orientation="Portrait"
+    shell:SystemTray.IsVisible="True">
+
+    <phone:PhoneApplicationPage.Resources>
+        <shell:ApplicationBarIconButton x:Key="reset" Text="reset" IconUri="/Assets/ApplicationBarIcons/reset.png" Click="Reset_Click" />
+        <shell:ApplicationBarIconButton x:Key="start" Text="start" IconUri="/Assets/ApplicationBarIcons/start.png" Click="Start_Click" />
+        <shell:ApplicationBarIconButton x:Key="pause" Text="pause" IconUri="/Assets/ApplicationBarIcons/pause.png" Click="Pause_Click" />
+        <shell:ApplicationBarIconButton x:Key="refresh" Text="refresh" IconUri="/Assets/ApplicationBarIcons/refresh.png" Click="Refresh_Click" />
+        <shell:ApplicationBarIconButton x:Key="export" Text="export" IconUri="/Assets/ApplicationBarIcons/export.png" Click="Export_Click" />
+    </phone:PhoneApplicationPage.Resources>
+
+    <!--LayoutRoot is the root grid where all page content is placed-->
+    <Grid x:Name="LayoutRoot" Background="Transparent">
+
+        <!-- LOCALIZATION NOTE:
+            To localize the displayed strings copy their values to appropriately named
+            keys in the app's neutral language resource file (AppResources.resx) then
+            replace the hard-coded text value between the attributes' quotation marks
+            with the binding clause whose path points to that string name.
+
+            For example:
+
+                Text="{Binding Path=LocalizedResources.ApplicationTitle, Source={StaticResource LocalizedStrings}}"
+
+            This binding points to the template's string resource named "ApplicationTitle".
+
+            Adding supported languages in the Project Properties tab will create a
+            new resx file per language that can carry the translated values of your
+            UI strings. The binding in these examples will cause the value of the
+            attributes to be drawn from the .resx file that matches the
+            CurrentUICulture of the app at run time.
+         -->
+
+        <phone:Pivot x:Name="pivot" Title="leaf logger" SelectionChanged="Pivot_SelectionChanged" >
+
+            <phone:PivotItem Header="battery" x:Name="dataPivotItem">
+                <ScrollViewer>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Text="State of Charge" Padding="0,0,0,10" FontFamily="{StaticResource PhoneFontFamilyBold}" FontSize="{StaticResource PhoneFontSizeMedium}"/>
+                        <user:StateOfChargeUserControl Grid.Row="1" />
+
+                        <TextBlock x:Name="capacityLabel" Grid.Row="2" Text="Capacity" Padding="0,10" FontFamily="{StaticResource PhoneFontFamilyBold}" FontSize="{StaticResource PhoneFontSizeMedium}"/>
+                        <user:CapacityUserControl x:Name="capacityControl" Grid.Row="3"/>
+
+                        <TextBlock Grid.Row="4" Text="{Binding DisplayTemperature, StringFormat='{}Battery Temps: {0}'}" Padding="0,10,0,0" FontFamily="{StaticResource PhoneFontFamilyBold}" FontSize="{StaticResource PhoneFontSizeMedium}" />
+                    </Grid>
+                </ScrollViewer>
+            </phone:PivotItem>
+
+            <phone:PivotItem x:Name="track" Header="track">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <maps:Map 
+                        Grid.Row="0"
+                        x:Name="map" 
+                        ZoomLevel="15" 
+                        Margin="0,0,0,5">
+                        <maptk:MapExtensions.Children>
+                            <maptk:UserLocationMarker x:Name="userLocationMarker" Visibility="Collapsed" />
+                            <maptk:MapItemsControl Name="obdUpdatesMapItemsControl">
+                                <maptk:MapItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <maptk:Pushpin GeoCoordinate="{Binding GeoCoordinate}" Content="{Binding SoC, StringFormat='{}{0:P2}'}" />
+                                    </DataTemplate>
+                                </maptk:MapItemsControl.ItemTemplate>
+                            </maptk:MapItemsControl>
+                        </maptk:MapExtensions.Children>
+                    </maps:Map>
+                    
+                    <TextBlock Grid.Row="1" Text="{Binding AverageEnergyEconomy, StringFormat='{}Energy Economy: {0:N1} m/kWh'}" Visibility="{Binding GeoCoordinate, Converter={StaticResource EmptyGeoCoordinateVisibilityConverter}}" Padding="0,5,0,0" FontFamily="{StaticResource PhoneFontFamilyBold}" FontSize="{StaticResource PhoneFontSizeMedium}"/>
+                    <TextBlock Grid.Row="2" Text="{Binding Range, StringFormat='{}Range: {0:N0} miles'}" Visibility="{Binding GeoCoordinate, Converter={StaticResource EmptyGeoCoordinateVisibilityConverter}}" Padding="0,5,0,5" FontFamily="{StaticResource PhoneFontFamilyBold}" FontSize="{StaticResource PhoneFontSizeMedium}"/>
+                </Grid>
+            </phone:PivotItem>
+
+            <phone:PivotItem x:Name="charts" Header="charts">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <telerikInput:RadListPicker 
+                        x:Name="chartPicker" 
+                        Grid.Row="0" 
+                        Header="Chart Type:"
+                        ItemsSource="{Binding ChartTypes}"
+                        SelectionChanged="chartPicker_SelectionChanged"
+                        InlineModeThreshold="0"
+                        PopupHeader="Chart Type"
+                        VerticalAlignment="Top"
+                        Padding="0"
+                        Margin="5,0,5,5"/>
+
+                    <chart:RadCartesianChart x:Name="chart" Grid.Row="1">
+                        <chart:RadCartesianChart.Behaviors>
+                            <chart:ChartPanAndZoomBehavior ZoomMode="Horizontal" PanMode="Horizontal"/>
+                        </chart:RadCartesianChart.Behaviors>
+                    </chart:RadCartesianChart>
+
+                </Grid>
+            </phone:PivotItem>
+
+            <phone:PivotItem x:Name="trips" Header="trips">
+                <ScrollViewer>
+                    <ItemsControl ItemsSource="{Binding Trips}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Tap="Grid_Tap" Margin="0,5">
+                                    <telerikPrimitives:RadContextMenu.ContextMenu>
+                                        <telerikPrimitives:RadContextMenu IsFadeEnabled="False" IsZoomEnabled="False">
+                                            <telerikPrimitives:RadContextMenuItem 
+                                                Tag="{Binding}"
+                                                Content="delete"
+                                                Tapped="Trip_Delete_Tapped"/>
+                                        </telerikPrimitives:RadContextMenu>
+                                    </telerikPrimitives:RadContextMenu.ContextMenu>
+
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="5" />
+                                        <ColumnDefinition Width="5" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Rectangle Width="5" Fill="{StaticResource PhoneAccentBrush}" Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" />
+
+                                    <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="2">
+                                        <TextBlock Text="{Binding Name}" FontFamily="{StaticResource PhoneFontFamilyBold}" />
+                                        <TextBlock Text="{Binding DisplayTripEnd, StringFormat='{}{0:g}'}" FontFamily="{StaticResource PhoneFontFamilyBold}" />
+                                    </StackPanel>
+
+                                    <StackPanel x:Name="details" Orientation="Vertical" Grid.Row="1" Grid.Column="2" Visibility="Collapsed">
+                                        <TextBlock Text="{Binding AverageEnergyEconomy, StringFormat='{}Energy Economy: {0:N1} miles/kWh'}" />
+                                        <TextBlock Text="{Binding ChargeUsed, StringFormat='{}Charge Used: {0:P2}'}" />
+                                        <TextBlock Text="{Binding KiloWattHoursUsed, StringFormat='{}Energy Used: {0:N1} kW'}" />
+                                        <TextBlock Text="{Binding Ascent, StringFormat='{}Ascent: {0:N0} ft'}" />
+                                        <TextBlock Text="{Binding Descent, StringFormat='{}Descent: {0:N0} ft'}" />
+                                        <TextBlock Text="{Binding Capacity, StringFormat='{}Capacity: {0:P2}'}" />
+                                        <TextBlock Text="{Binding RawCapacity, StringFormat='{}Capacity Value: {0:N2} AHr'}" />
+                                        <TextBlock Text="{Binding DisplayAverageTemperature, StringFormat='{}Average Battery Temp: {0}'}" Visibility="{Binding DisplayAverageTemperature, Converter={StaticResource NullVisibilityConverter}, ConverterParameter='Invert'}" />
+                                        <TextBlock Text="{Binding DisplayMinimumTemperature, StringFormat='{}Minimum Battery Temp: {0}'}" Visibility="{Binding DisplayMinimumTemperature, Converter={StaticResource NullVisibilityConverter}, ConverterParameter='Invert'}" />
+                                        <TextBlock Text="{Binding DisplayMaximumTemperature, StringFormat='{}Maximum Battery Temp: {0}'}" Visibility="{Binding DisplayMaximumTemperature, Converter={StaticResource NullVisibilityConverter}, ConverterParameter='Invert'}" />
+                                        <TextBlock Text="{Binding Distance, StringFormat='{}Distance: {0:N2} mi'}" />
+                                        <TextBlock Text="{Binding Duration, StringFormat='{}Trip Duration: {0:hh\\:mm\\:ss}'}" />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </phone:PivotItem>
+        </phone:Pivot>
+    </Grid>
+
+    <shell:SystemTray.ProgressIndicator>
+        <shell:ProgressIndicator IsIndeterminate="True" IsVisible="False" />
+    </shell:SystemTray.ProgressIndicator>
+
+    <phone:PhoneApplicationPage.ApplicationBar>
+        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
+            <shell:ApplicationBar.MenuItems>
+                <shell:ApplicationBarMenuItem Text="settings" Click="Settings_Click" />
+            </shell:ApplicationBar.MenuItems>
+        </shell:ApplicationBar>
+    </phone:PhoneApplicationPage.ApplicationBar>
+
+</phone:PhoneApplicationPage>
